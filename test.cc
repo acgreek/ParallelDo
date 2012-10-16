@@ -1,5 +1,6 @@
 #include<ExtremeCUnit.h>
 #include "thread_processor.hpp"
+#include "parallel_for_each.hpp"
 
 
 void func(int &i) {
@@ -72,6 +73,19 @@ TEST(ThreadProcessorQueue2Mixed)
 	jq2.wait_until_done();
 	AssertEqInt(i, 5);
 	AssertEqInt(j, 4);
+	return 0;
+}
+TEST(ParallelForEach) {
+	ThreadProcessor testProcessor(10);
+	std::vector<int > foo;
+	foo.push_back(5);
+	foo.push_back(6) ;
+	foo.push_back(7) ;
+	foo.push_back(8) ;
+	foo.push_back(9) ;
+	AssertEqInt(foo[0], 5);
+	ParallelForEach (&testProcessor, &func2, foo);
+	AssertEqInt(foo[0], 6);
 	return 0;
 }
 

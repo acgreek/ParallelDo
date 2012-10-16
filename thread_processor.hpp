@@ -1,3 +1,5 @@
+#ifndef THREAD_PROCESSOR_HPP
+#define THREAD_PROCESSOR_HPP
 
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp> 
@@ -58,7 +60,6 @@ class ThreadProcessor {
 					break;
 				job();
 			}
-			std::cout <<"thread " << worker_id << " done" << std::endl;
 		}
 
 		void start_workers() {
@@ -161,3 +162,4 @@ class BatchTracker {
 		boost::mutex mutex;
 		ThreadProcessor *threadProcessorp_;
 };
+#endif
