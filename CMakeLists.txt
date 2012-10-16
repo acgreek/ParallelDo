@@ -1,10 +1,17 @@
 cmake_minimum_required (VERSION 0.1)
 project (serialparrelleprocessor)
 
+find_package(PkgConfig)
+pkg_check_modules (EXTREMECUNIT ExtremeCUnit)
+
+string(REPLACE ";" " " EXTREMECUNIT_LDFLAGS2 "${EXTREMECUNIT_LDFLAGS}" )
+string(REPLACE ";" " " EXTREMECUNIT_CFLAGS2 "${EXTREMECUNIT_CFLAGS}" )
+message(STATUS "CFLAGS=" ${EXTREMECUNIT_CFLAGS2})
+
 ## Compiler flags
 if(CMAKE_COMPILER_IS_GNUCXX)
-	set(CMAKE_CXX_FLAGS "-DUNIT_TEST -g -std=c++0x")
-	set(CMAKE_CXX_FLAGS "-DUNIT_TEST -ggdb3 -std=c++0x -Wextra -Wall -pedantic")
+	set(CMAKE_CXX_FLAGS "${EXTREMECUNIT_CFLAGS2}")
+	set(CMAKE_CXX_FLAGS "${EXTREMECUNIT_CFLAGS2}")
 endif()
 
 
@@ -13,10 +20,10 @@ add_executable(test test.cc)
 
 
 set(test CMAKE_CXX_FLAGS "-Wall -g  -std=c++0x -DUNIT_TEST -fPIC -pie -rdynamic")
-set(test CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist -lboost_thread -lboost_system")
-set (test CMAKE_CXX_LINK_FLAGS "-Wall -pie -Wl,--rpath,.,--rpath,dist -lboost_thread -lboost_system")
+set(test CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist -lboost_thread-mt -lboost_system-mt")
+set (test CMAKE_CXX_LINK_FLAGS "-Wall -pie -Wl,--rpath,.,--rpath,dist -lboost_thread-mt -lboost_system-mt")
 
-target_link_libraries(test -pie -Wl,--rpath,.,--rpath,dist ExtremeCUnit dl -lboost_thread -lboost_system)
+target_link_libraries(test ${EXTREMECUNIT_LDFLAGS} -lboost_thread-mt -lboost_system-mt)
 
 add_custom_target(run ./test )
 add_custom_target(runv ./test -v)

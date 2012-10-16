@@ -75,3 +75,8 @@ TEST(ThreadProcessorQueue2Mixed)
 	return 0;
 }
 
+#ifdef __CYGWIN__ 
+int main (int argc, char * argv[]){
+	return windows_main(argc, argv);
+}
+#endif
