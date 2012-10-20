@@ -75,7 +75,8 @@ TEST(ThreadProcessorQueue2Mixed)
 	AssertEqInt(j, 4);
 	return 0;
 }
-TEST(ParallelForEach) {
+
+TEST(ParallelForEach_Vector) {
 	ThreadProcessor testProcessor(10);
 	std::vector<int > foo;
 	foo.push_back(5);
@@ -84,8 +85,40 @@ TEST(ParallelForEach) {
 	foo.push_back(8) ;
 	foo.push_back(9) ;
 	AssertEqInt(foo[0], 5);
-	ParallelForEach (&testProcessor, &func2, foo);
+	ParallelForEach (&testProcessor, &func2, foo.begin(), foo.end());
 	AssertEqInt(foo[0], 6);
+	AssertEqInt(foo[4], 10);
+	return 0;
+}
+TEST(ParallelForEach_list) {
+	ThreadProcessor testProcessor(10);
+	std::list<int > foo;
+	foo.push_back(5);
+	foo.push_back(6) ;
+	foo.push_back(7) ;
+	foo.push_back(8) ;
+	foo.push_back(9) ;
+	AssertEqInt(foo.front(), 5);
+	ParallelForEach (&testProcessor, &func2, foo.begin(), foo.end());
+	AssertEqInt(foo.front(), 6);
+	AssertEqInt(foo.back(), 10);
+	return 0;
+}
+TEST(ParallelForEach_carray) {
+	ThreadProcessor testProcessor(10);
+	int foo[5];
+	foo[0]=5;
+	foo[1]=6;
+	foo[2]=7;
+	foo[3]=8;
+	foo[4]=9;
+	AssertEqInt(foo[0], 5);
+	ParallelForEach (&testProcessor, &func2, foo, &foo[5]);
+	AssertEqInt(foo[0], 6);
+	AssertEqInt(foo[1], 7);
+	AssertEqInt(foo[2], 8);
+	AssertEqInt(foo[3], 9);
+	AssertEqInt(foo[4], 10);
 	return 0;
 }
 

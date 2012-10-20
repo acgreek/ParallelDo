@@ -5,11 +5,11 @@
 #include "boost/foreach.hpp"
 
 template <typename T, typename K > 
-void ParallelForEach (ThreadProcessor *threadProcessorp, void func(T & i), K & values ) {
-
+void ParallelForEach (ThreadProcessor *threadProcessorp, void func(T & i), K begin, K end) {
 	BatchTracker jq(threadProcessorp);
-	BOOST_FOREACH(T &i, values) {
-		jq.post(boost::bind(func,  boost::ref(i))); 
+	while (begin != end) {
+		jq.post(boost::bind(func,  boost::ref(*begin))); 
+		begin++;
 	}
 	jq.wait_until_done();
 }
