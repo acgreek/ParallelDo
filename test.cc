@@ -121,6 +121,51 @@ TEST(ParallelForEach_carray) {
 	AssertEqInt(foo[4], 10);
 	return 0;
 }
+int add( int &a, int& b) {
+	return a+b;
+}
+TEST(ParallelComputeEmpty) {
+	ThreadProcessor testProcessor(10);
+	std::vector<int > foo;
+	int sum = ParallelCompute(&testProcessor,24, &add, foo.begin(),foo.end());
+	AssertEqInt(sum,24); 
+}
+TEST(ParallelComputeOne) {
+	ThreadProcessor testProcessor;
+	std::vector<int > foo;
+	foo.push_back(5);
+	int sum = ParallelCompute(&testProcessor,0, &add, foo.begin(),foo.end());
+	AssertEqInt(sum,5); 
+}
+TEST(ParallelComputeTwo) {
+	ThreadProcessor testProcessor;
+	std::vector<int > foo;
+	foo.push_back(5);
+	foo.push_back(6);
+	int sum = ParallelCompute(&testProcessor,0, &add, foo.begin(),foo.end());
+	AssertEqInt(sum,11); 
+}
+TEST(ParallelComputeThree) {
+	ThreadProcessor testProcessor;
+	std::vector<int > foo;
+	foo.push_back(5);
+	foo.push_back(6);
+	foo.push_back(7);
+	int sum = ParallelCompute(&testProcessor,0, &add, foo.begin(),foo.end());
+	AssertEqInt(sum,18); 
+}
+TEST(ParallelCompute) {
+	ThreadProcessor testProcessor(10);
+	int foo[5];
+	foo[0]=1;
+	foo[1]=2;
+	foo[2]=3;
+	foo[3]=4;
+	foo[4]=5;
+	int sum = ParallelCompute(&testProcessor,0, &add, foo, &foo[5]);
+	AssertEqInt(sum,15); 
+}
+
 
 #ifdef __CYGWIN__ 
 int main (int argc, char * argv[]){

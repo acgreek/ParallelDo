@@ -106,7 +106,7 @@ class BatchTracker {
 		/**
 		 * @param seconds max number of seconds to wait for all jobs to complete
 		 */
-		bool wait_until_done(time_t seconds = 90) {
+		bool wait_until_done(time_t seconds = 0) {
 			if (number_of_jobs_complete == number_of_jobs_total)
 				return true;
 			return wait_until_done_locked(seconds);
@@ -153,7 +153,7 @@ class BatchTracker {
 				if (number_of_jobs_complete != number_of_jobs_total)  {
 					now = time(NULL);
 				}
-			}while  (number_of_jobs_complete != number_of_jobs_total && ((now - start) < max_seconds)) ;
+			}while  (number_of_jobs_complete != number_of_jobs_total && (max_seconds == 0  || ((now - start) < max_seconds))) ;
 			return (number_of_jobs_complete == number_of_jobs_total);
 		}
 		volatile int number_of_jobs_total;

@@ -10,8 +10,8 @@ message(STATUS "CFLAGS=" ${EXTREMECUNIT_CFLAGS2})
 
 ## Compiler flags
 if(CMAKE_COMPILER_IS_GNUCXX)
-	set(CMAKE_CXX_FLAGS "${EXTREMECUNIT_CFLAGS2}")
-	set(CMAKE_CXX_FLAGS "${EXTREMECUNIT_CFLAGS2}")
+	set(CMAKE_CXX_FLAGS "-ggdb ${EXTREMECUNIT_CFLAGS2}")
+	set(CMAKE_CXX_FLAGS "-ggdb ${EXTREMECUNIT_CFLAGS2}")
 endif()
 
 
@@ -19,9 +19,9 @@ add_executable(test test.cc)
 
 
 
-set(test CMAKE_CXX_FLAGS "-Wall -g  -std=c++0x -DUNIT_TEST -fPIC -pie -rdynamic")
+set(test CMAKE_CXX_FLAGS "-Wall -ggdb  -std=c++0x -DUNIT_TEST -fPIC -pie -rdynamic")
 set(test CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist -lboost_thread-mt -lboost_system-mt")
-set (test CMAKE_CXX_LINK_FLAGS "-Wall -pie -Wl,--rpath,.,--rpath,dist -lboost_thread-mt -lboost_system-mt")
+set (test CMAKE_CXX_LINK_FLAGS "-Wall -ggdb -pie -Wl,--rpath,.,--rpath,dist -lboost_thread-mt -lboost_system-mt")
 
 target_link_libraries(test ${EXTREMECUNIT_LDFLAGS} -lboost_thread-mt -lboost_system-mt)
 
