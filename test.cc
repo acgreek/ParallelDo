@@ -85,7 +85,7 @@ TEST(ParallelForEach_Vector) {
 	foo.push_back(8) ;
 	foo.push_back(9) ;
 	AssertEqInt(foo[0], 5);
-	ParallelForEach (&testProcessor, &func2, foo.begin(), foo.end());
+	ParallelDo::forEach (&testProcessor, &func2, foo.begin(), foo.end());
 	AssertEqInt(foo[0], 6);
 	AssertEqInt(foo[4], 10);
 	return 0;
@@ -99,7 +99,7 @@ TEST(ParallelForEach_list) {
 	foo.push_back(8) ;
 	foo.push_back(9) ;
 	AssertEqInt(foo.front(), 5);
-	ParallelForEach (&testProcessor, &func2, foo.begin(), foo.end());
+	ParallelDo::forEach (&testProcessor, &func2, foo.begin(), foo.end());
 	AssertEqInt(foo.front(), 6);
 	AssertEqInt(foo.back(), 10);
 	return 0;
@@ -113,7 +113,7 @@ TEST(ParallelForEach_carray) {
 	foo[3]=8;
 	foo[4]=9;
 	AssertEqInt(foo[0], 5);
-	ParallelForEach (&testProcessor, &func2, foo, &foo[5]);
+	ParallelDo::forEach (&testProcessor, &func2, foo, &foo[5]);
 	AssertEqInt(foo[0], 6);
 	AssertEqInt(foo[1], 7);
 	AssertEqInt(foo[2], 8);
@@ -127,14 +127,14 @@ int add( int &a, int& b) {
 TEST(ParallelComputeEmpty) {
 	ThreadProcessor testProcessor(10);
 	std::vector<int > foo;
-	int sum = ParallelCompute(&testProcessor,24, &add, foo.begin(),foo.end());
+	int sum = ParallelDo::compute(&testProcessor,24, &add, foo.begin(),foo.end());
 	AssertEqInt(sum,24); 
 }
 TEST(ParallelComputeOne) {
 	ThreadProcessor testProcessor;
 	std::vector<int > foo;
 	foo.push_back(5);
-	int sum = ParallelCompute(&testProcessor,0, &add, foo.begin(),foo.end());
+	int sum = ParallelDo::compute(&testProcessor,0, &add, foo.begin(),foo.end());
 	AssertEqInt(sum,5); 
 }
 TEST(ParallelComputeTwo) {
@@ -142,7 +142,7 @@ TEST(ParallelComputeTwo) {
 	std::vector<int > foo;
 	foo.push_back(5);
 	foo.push_back(6);
-	int sum = ParallelCompute(&testProcessor,0, &add, foo.begin(),foo.end());
+	int sum = ParallelDo::compute(&testProcessor,0, &add, foo.begin(),foo.end());
 	AssertEqInt(sum,11); 
 }
 TEST(ParallelComputeThree) {
@@ -151,7 +151,7 @@ TEST(ParallelComputeThree) {
 	foo.push_back(5);
 	foo.push_back(6);
 	foo.push_back(7);
-	int sum = ParallelCompute(&testProcessor,0, &add, foo.begin(),foo.end());
+	int sum = ParallelDo::compute(&testProcessor,0, &add, foo.begin(),foo.end());
 	AssertEqInt(sum,18); 
 }
 TEST(ParallelCompute) {
@@ -162,7 +162,7 @@ TEST(ParallelCompute) {
 	foo[2]=3;
 	foo[3]=4;
 	foo[4]=5;
-	int sum = ParallelCompute(&testProcessor,0, &add, foo, &foo[5]);
+	int sum =  ParallelDo::compute(&testProcessor,0, &add, foo, &foo[5]);
 	AssertEqInt(sum,15); 
 }
 
