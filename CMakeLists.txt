@@ -20,10 +20,16 @@ add_executable(test test.cc)
 
 
 set(test CMAKE_CXX_FLAGS "-Wall -ggdb  -std=c++0x -DUNIT_TEST -fPIC -pie -rdynamic")
-set(test CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist -lboost_thread-mt -lboost_system-mt")
+IF(CYGWIN)
+set(test CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist -lboost_thread-mt -lboost_system")
 set (test CMAKE_CXX_LINK_FLAGS "-Wall -ggdb -pie -Wl,--rpath,.,--rpath,dist -lboost_thread-mt -lboost_system-mt")
-
 target_link_libraries(test ${EXTREMECUNIT_LDFLAGS} -lboost_thread-mt -lboost_system-mt)
+ELSE()
+set(test CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist -lboost_thread -lboost_system")
+set (test CMAKE_CXX_LINK_FLAGS "-Wall -ggdb -pie -Wl,--rpath,.,--rpath,dist -lboost_thread -lboost_system")
+target_link_libraries(test ${EXTREMECUNIT_LDFLAGS} -lboost_thread -lboost_system)
+ENDIF(CYGWIN)
+
 
 add_custom_target(run ./test )
 add_custom_target(runv ./test -v)
