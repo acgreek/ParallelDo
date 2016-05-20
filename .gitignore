@@ -4,4 +4,7 @@ Makefile
 cmake_install.cmake
 libtest.dll.a
 test.exe
+test
+bench
+bench.exe
 
