@@ -10,7 +10,7 @@ TEST(ThreadProcessor1) {
 	int i=0;
 	ThreadProcessor testProcessor(200, 1);
 
-	testProcessor.post(boost::bind(&func, boost::ref(i))); 
+	testProcessor.post(boost::bind(&func, boost::ref(i)));
 	while (testProcessor.queued())
 		sleep(1);
 	AssertEqInt(i, 1);
@@ -22,53 +22,53 @@ void func2(int & i) {
 	i++;
 }
 
-TEST(ThreadProcessorQueue)	 
+TEST(ThreadProcessorQueue)
 {
 	int i=0, j=0;
 	ThreadProcessor testProcessor(10);
 
 	BatchTracker jq(&testProcessor);
-	jq.post(boost::bind(&func2, boost::ref(i))); 
+	jq.post(boost::bind(&func2, boost::ref(i)));
 	jq.wait_until_done();
 	AssertEqInt(i, 1);
 	jq.reset();
 	i=j=0;
-	jq.post(boost::bind(&func2, boost::ref(i))); 
-	jq.post(boost::bind(&func2, boost::ref(i))); 
-	jq.post(boost::bind(&func2, boost::ref(i))); 
-	jq.post(boost::bind(&func2, boost::ref(i))); 
+	jq.post(boost::bind(&func2, boost::ref(i)));
+	jq.post(boost::bind(&func2, boost::ref(i)));
+	jq.post(boost::bind(&func2, boost::ref(i)));
+	jq.post(boost::bind(&func2, boost::ref(i)));
 	jq.wait_until_done();
 	AssertEqInt(i, 4);
 	return 0;
 }
-TEST(ThreadProcessorQueue4)	 
+TEST(ThreadProcessorQueue4)
 {
 	int i=0;
 	ThreadProcessor testProcessor(10);
 	BatchTracker jq(&testProcessor);
-	jq.post(boost::bind(&func2, boost::ref(i))); 
-	jq.post(boost::bind(&func2, boost::ref(i))); 
-	jq.post(boost::bind(&func2, boost::ref(i))); 
-	jq.post(boost::bind(&func2, boost::ref(i))); 
+	jq.post(boost::bind(&func2, boost::ref(i)));
+	jq.post(boost::bind(&func2, boost::ref(i)));
+	jq.post(boost::bind(&func2, boost::ref(i)));
+	jq.post(boost::bind(&func2, boost::ref(i)));
 	jq.wait_until_done();
 	AssertEqInt(i, 4);
 	return 0;
 }
-TEST(ThreadProcessorQueue2Mixed)	 
+TEST(ThreadProcessorQueue2Mixed)
 {
 	int i=0, j=0;
 	ThreadProcessor testProcessor(10);
 	BatchTracker jq(&testProcessor);
 	BatchTracker jq2(&testProcessor);
-	jq.post(boost::bind(&func2,  boost::ref(i))); 
-	jq2.post(boost::bind(&func2, boost::ref(j))); 
-	jq.post(boost::bind(&func2,  boost::ref(i))); 
-	jq2.post(boost::bind(&func2, boost::ref(j))); 
-	jq.post(boost::bind(&func2,  boost::ref(i))); 
-	jq2.post(boost::bind(&func2, boost::ref(j))); 
-	jq.post(boost::bind(&func2,  boost::ref(i))); 
-	jq.post(boost::bind(&func2,  boost::ref(i))); 
-	jq2.post(boost::bind(&func2, boost::ref(j))); 
+	jq.post(boost::bind(&func2,  boost::ref(i)));
+	jq2.post(boost::bind(&func2, boost::ref(j)));
+	jq.post(boost::bind(&func2,  boost::ref(i)));
+	jq2.post(boost::bind(&func2, boost::ref(j)));
+	jq.post(boost::bind(&func2,  boost::ref(i)));
+	jq2.post(boost::bind(&func2, boost::ref(j)));
+	jq.post(boost::bind(&func2,  boost::ref(i)));
+	jq.post(boost::bind(&func2,  boost::ref(i)));
+	jq2.post(boost::bind(&func2, boost::ref(j)));
 	jq.wait_until_done();
 	jq2.wait_until_done();
 	AssertEqInt(i, 5);
@@ -128,14 +128,16 @@ TEST(ParallelComputeEmpty) {
 	ThreadProcessor testProcessor(10);
 	std::vector<int > foo;
 	int sum = ParallelDo::compute(&testProcessor,24, &add, foo.begin(),foo.end());
-	AssertEqInt(sum,24); 
+	AssertEqInt(sum,24);
+    return 0;
 }
 TEST(ParallelComputeOne) {
 	ThreadProcessor testProcessor;
 	std::vector<int > foo;
 	foo.push_back(5);
 	int sum = ParallelDo::compute(&testProcessor,0, &add, foo.begin(),foo.end());
-	AssertEqInt(sum,5); 
+	AssertEqInt(sum,5);
+    return 0;
 }
 TEST(ParallelComputeTwo) {
 	ThreadProcessor testProcessor;
@@ -143,7 +145,8 @@ TEST(ParallelComputeTwo) {
 	foo.push_back(5);
 	foo.push_back(6);
 	int sum = ParallelDo::compute(&testProcessor,0, &add, foo.begin(),foo.end());
-	AssertEqInt(sum,11); 
+	AssertEqInt(sum,11);
+    return 0;
 }
 TEST(ParallelComputeThree) {
 	ThreadProcessor testProcessor;
@@ -152,7 +155,8 @@ TEST(ParallelComputeThree) {
 	foo.push_back(6);
 	foo.push_back(7);
 	int sum = ParallelDo::compute(&testProcessor,0, &add, foo.begin(),foo.end());
-	AssertEqInt(sum,18); 
+	AssertEqInt(sum,18);
+    return 0;
 }
 TEST(ParallelCompute) {
 	ThreadProcessor testProcessor(10);
@@ -163,11 +167,12 @@ TEST(ParallelCompute) {
 	foo[3]=4;
 	foo[4]=5;
 	int sum =  ParallelDo::compute(&testProcessor,0, &add, foo, &foo[5]);
-	AssertEqInt(sum,15); 
+	AssertEqInt(sum,15);
+    return 0;
 }
 
 
-#ifdef __CYGWIN__ 
+#ifdef __CYGWIN__
 int main (int argc, char * argv[]){
 	return windows_main(argc, argv);
 }
