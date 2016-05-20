@@ -10,7 +10,7 @@ void func(int i) {
     k +=j;
 }
 int main(int argc, char * argv[]) {
-	ThreadProcessor testProcessor(10);
+	ThreadProcessor testProcessor(500, 10);
 
 	BatchTracker jq(&testProcessor);
     for (int i=0; i< atoi(argv[1]); i++) {
