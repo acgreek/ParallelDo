@@ -16,23 +16,27 @@ endif()
 
 
 add_executable(test test.cc) 
+add_executable(bench bench.cpp) 
 
 
 
-set(test CMAKE_CXX_FLAGS "-Wall -ggdb  -std=c++0x -DUNIT_TEST -fPIC -pie -rdynamic")
+set(CMAKE_CXX_FLAGS "-Wall -ggdb  -std=c++0x -DUNIT_TEST -fPIC -pie -rdynamic")
+set(CMAKE_CXX_LINK_FLAGS "-Wall -ggdb -pie -Wl,--rpath,.,--rpath,dist")
+set(CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist")
+set(CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist")
+
 IF(CYGWIN)
-set(test CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist -lboost_thread-mt -lboost_system")
-set (test CMAKE_CXX_LINK_FLAGS "-Wall -ggdb -pie -Wl,--rpath,.,--rpath,dist -lboost_thread-mt -lboost_system-mt")
-target_link_libraries(test ${EXTREMECUNIT_LDFLAGS} -lboost_thread-mt -lboost_system-mt)
+set(BOOST_LIBS -lboost_thread-mt -lboost_system-mt)
 ELSE()
-set(test CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist -lboost_thread -lboost_system")
-set (test CMAKE_CXX_LINK_FLAGS "-Wall -ggdb -pie -Wl,--rpath,.,--rpath,dist -lboost_thread -lboost_system")
-target_link_libraries(test ${EXTREMECUNIT_LDFLAGS} -lboost_thread -lboost_system)
+set(BOOST_LIBS -lboost_thread -lboost_system)
 ENDIF(CYGWIN)
 
+target_link_libraries(test ${EXTREMECUNIT_LDFLAGS} ${BOOST_LIBS})
+target_link_libraries(bench ${EXTREMECUNIT_LDFLAGS} ${BOOST_LIBS})
 
 add_custom_target(run ./test )
 add_custom_target(runv ./test -v)
 
 ADD_DEPENDENCIES(run test)
 ADD_DEPENDENCIES(runv test)
+
