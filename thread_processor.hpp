@@ -8,7 +8,7 @@
 
 class ThreadProcessor {
 public:
-	ThreadProcessor(int max_wait_for_job_sec = 200, int number_of_worker_threads = 0):
+	ThreadProcessor(int max_wait_for_job_sec = 500, int number_of_worker_threads = 0):
 		io_mutex_(), cond_(),
 		initialized_(false), actors_(),
 		number_messages_(0), done_(false), message_list_(),
@@ -41,8 +41,8 @@ public:
 	void post(work_t func) {
 		boost::mutex::scoped_lock lock(io_mutex_);
 		message_list_.push_back(func);
-
 		number_messages_++;
+        lock.unlock();
 		cond_.notify_one();
 	}
 
@@ -54,7 +54,7 @@ private:
 	bool getJob(work_t &job) {
 		boost::mutex::scoped_lock lock(io_mutex_);
 		while (false == done_ && queued() == 0) {
-			boost::system_time tAbsoluteTime = boost::get_system_time() + boost::posix_time::seconds(max_wait_for_job_sec_);
+			boost::system_time tAbsoluteTime = boost::get_system_time() + boost::posix_time::milliseconds(max_wait_for_job_sec_);
 			cond_.timed_wait(io_mutex_, tAbsoluteTime);
 		}
 		if (queued() == 0)
