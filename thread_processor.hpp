@@ -14,9 +14,14 @@ class ThreadProcessor {
 			initialized_(false), actors_(),
 			number_messages_(0), done_(false), message_list_(),
 			max_wait_for_job_(max_wait_for_job),
-			number_of_worker_threads_(number_of_worker_threads), jobs_per_worker_(jobs_per_worker) {
+			number_of_worker_threads_(number_of_worker_threads), jobs_per_worker_(jobs_per_worker),exit_func_(NULL) {
 				start_workers();
 			}
+		typedef boost::function<void ()> work_t;
+
+		void set_exit_func(ThreadProcessor::work_t exit_func) {
+			exit_func_ = exit_func;
+		}
 
 		void set_done() {
 			boost::mutex::scoped_lock lock(io_mutex_);
@@ -30,7 +35,6 @@ class ThreadProcessor {
 			actors_.join_all();
 		}
 
-		typedef boost::function<void ()> work_t;
 		/**
 		 * you can use this to schedule a task to run if you don't care to
 		 * wait for it to complete
@@ -99,6 +103,8 @@ class ThreadProcessor {
 					myWorkList.pop_front();
 					job();
 				}
+				if (exit_func_)
+					exit_func_();
 			}
 		}
 
@@ -125,6 +131,7 @@ class ThreadProcessor {
 		int max_wait_for_job_;
 		int number_of_worker_threads_;
 		int jobs_per_worker_;
+		work_t exit_func_;
 	public:
 };
 
