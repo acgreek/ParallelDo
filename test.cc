@@ -75,6 +75,29 @@ TEST(ThreadProcessorQueue2Mixed)
 	AssertEqInt(j, 4);
 	return 0;
 }
+TEST(ThreadProcessorQueue2MixedWorkList)
+{
+	int i=0, j=0;
+	ThreadProcessor testProcessor(10);
+	BatchTracker jq2(&testProcessor);
+    std::list<ThreadProcessor::work_t> wlist;
+    wlist.push_back(boost::bind(&func2,  boost::ref(i)));
+	jq2.post(boost::bind(&func2, boost::ref(j)));
+	wlist.push_back(boost::bind(&func2,  boost::ref(i)));
+	jq2.post(boost::bind(&func2, boost::ref(j)));
+	wlist.push_back(boost::bind(&func2,  boost::ref(i)));
+	jq2.post(boost::bind(&func2, boost::ref(j)));
+	wlist.push_back(boost::bind(&func2,  boost::ref(i)));
+	wlist.push_back(boost::bind(&func2,  boost::ref(i)));
+    testProcessor.postWorkList(wlist);
+	jq2.post(boost::bind(&func2, boost::ref(j)));
+	jq2.wait_until_done();
+    // don't have to sleep because last job is on a batch processor
+
+	AssertEqInt(i, 5);
+	AssertEqInt(j, 4);
+	return 0;
+}
 
 TEST(ParallelForEach_Vector) {
 	ThreadProcessor testProcessor(10);

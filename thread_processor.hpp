@@ -9,11 +9,11 @@
 
 class ThreadProcessor {
 	public:
-		ThreadProcessor(int max_wait_for_job_sec = 500, int number_of_worker_threads = 0, int jobs_per_worker=5):
+		ThreadProcessor(int max_wait_for_job = 500, int number_of_worker_threads = 0, int jobs_per_worker=5):
 			io_mutex_(), cond_(),
 			initialized_(false), actors_(),
 			number_messages_(0), done_(false), message_list_(),
-			max_wait_for_job_sec_(max_wait_for_job_sec),
+			max_wait_for_job_(max_wait_for_job),
 			number_of_worker_threads_(number_of_worker_threads), jobs_per_worker_(jobs_per_worker) {
 				start_workers();
 			}
@@ -31,7 +31,6 @@ class ThreadProcessor {
 		}
 
 		typedef boost::function<void ()> work_t;
-
 		/**
 		 * you can use this to schedule a task to run if you don't care to
 		 * wait for it to complete
@@ -45,16 +44,23 @@ class ThreadProcessor {
 			lock.unlock();
 			cond_.notify_one();
 		}
+		void postWorkList(std::list<work_t> &worklist) {
+			boost::mutex::scoped_lock lock(io_mutex_);
+			int size = worklist.size();
+			message_list_.splice(message_list_.end(),worklist );
+			number_messages_+=size;
+			lock.unlock();
+			cond_.notify_one();
+		}
 
 		int queued() const {	//this is intensionally not locked
 			return number_messages_;
 		}
-
 	private:
 		bool getJobs(std::list<work_t> &jobs) {
 			boost::mutex::scoped_lock lock(io_mutex_);
 			while (false == done_ && queued() == 0) {
-				boost::system_time tAbsoluteTime = boost::get_system_time() + boost::posix_time::milliseconds(max_wait_for_job_sec_);
+				boost::system_time tAbsoluteTime = boost::get_system_time() + boost::posix_time::milliseconds(max_wait_for_job_);
 				cond_.timed_wait(io_mutex_, tAbsoluteTime);
 			}
 			int available = queued();
@@ -116,11 +122,10 @@ class ThreadProcessor {
 		volatile bool done_;
 
 		std::list<work_t> message_list_;
-		int max_wait_for_job_sec_;
+		int max_wait_for_job_;
 		int number_of_worker_threads_;
 		int jobs_per_worker_;
 	public:
-
 };
 
 /**
@@ -141,6 +146,10 @@ class BatchTracker : boost::noncopyable
 		 * a boost::bind to schedule with arguments
 		 */
 		void post(boost::function<void ()> func) {
+			threadProcessorp_->post(boost::bind(&BatchTracker::wrap, this, func));
+			incJobCount();
+		}
+		void postWorkList(boost::function<void ()> func) {
 			threadProcessorp_->post(boost::bind(&BatchTracker::wrap, this, func));
 			incJobCount();
 		}

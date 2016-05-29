@@ -10,7 +10,12 @@ void func(int i) {
     k +=j;
 }
 int main(int argc, char * argv[]) {
-	ThreadProcessor testProcessor(500, 10);
+    if (argc < 1) {
+        fprintf(stderr, "need one arg\n");
+
+        return EXIT_FAILURE;
+    }
+	ThreadProcessor testProcessor(500, 2);
 
 	BatchTracker jq(&testProcessor);
     for (int i=0; i< atoi(argv[1]); i++) {

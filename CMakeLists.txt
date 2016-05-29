@@ -18,8 +18,10 @@ endif()
 add_executable(test test.cc) 
 add_executable(bench bench.cpp) 
 
-set(CMAKE_CXX_FLAGS "-Wall -ggdb  -std=c++0x -DUNIT_TEST -fPIC -pie -rdynamic")
-set(CMAKE_CXX_LINK_FLAGS "-Wall -ggdb -pie -Wl,--rpath,.,--rpath,dist")
+set(CMAKE_C_COMPILER "/usr/bin/clang")
+set(CMAKE_CXX_COMPILER  "/usr/bin/clang++")
+set(CMAKE_CXX_FLAGS "-O3 -Wextra -Wall -ggdb  -std=c++0x -DUNIT_TEST -fPIC")
+set(CMAKE_CXX_LINK_FLAGS "-Wall -ggdb -pie -rdynamic -Wl,--rpath,.,--rpath,dist")
 set(CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist")
 set(CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist")
 
