@@ -1,5 +1,8 @@
 #include<ExtremeCUnit.h>
-#include "thread_processor.hpp"
+#include "thread_processor.h"
+#include "batch_processor.h"
+using namespace ParallelDo;
+
 #include "parallel_for_each.hpp"
 
 

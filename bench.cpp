@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include "thread_processor.hpp"
+#include "thread_processor.h"
+#include "batch_processor.h"
 int k;
 
 void func(int i) {
@@ -15,9 +16,9 @@ int main(int argc, char * argv[]) {
 
         return EXIT_FAILURE;
     }
-	ThreadProcessor testProcessor(500, 2);
+	ParallelDo::ThreadProcessor testProcessor(500, 2);
 
-	BatchTracker jq(&testProcessor);
+	ParallelDo::BatchTracker jq(&testProcessor);
     for (int i=0; i< atoi(argv[1]); i++) {
         jq.post(boost::bind(&func, i));
     }
