@@ -1,6 +1,7 @@
 cmake_minimum_required (VERSION 0.1)
 project (serialparrelleprocessor)
 
+find_package(Boost 1.40 COMPONENTS thread REQUIRED)
 find_package(PkgConfig)
 pkg_check_modules (EXTREMECUNIT ExtremeCUnit)
 
@@ -18,8 +19,8 @@ endif()
 add_executable(test test.cc) 
 add_executable(bench bench.cpp) 
 
-set(CMAKE_C_COMPILER "/usr/bin/clang")
-set(CMAKE_CXX_COMPILER  "/usr/bin/clang++")
+#set(CMAKE_C_COMPILER "/usr/bin/clang")
+#set(CMAKE_CXX_COMPILER  "/usr/bin/clang++")
 set(CMAKE_CXX_FLAGS "-O3 -Wextra -Wall -ggdb  -std=c++0x -DUNIT_TEST -fPIC")
 set(CMAKE_CXX_LINK_FLAGS "-Wall -ggdb -pie -rdynamic -Wl,--rpath,.,--rpath,dist")
 set(CMAKE_LINKER_FLAGS "-pie -Wl,--rpath,.,--rpath,dist")
