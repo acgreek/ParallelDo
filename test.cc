@@ -1,6 +1,7 @@
 #include<ExtremeCUnit.h>
 #include "thread_processor.h"
 #include "batch_processor.h"
+#include "continuous_stream.h"
 using namespace ParallelDo;
 
 #include "parallel_for_each.hpp"
@@ -198,10 +199,39 @@ TEST(ParallelCompute) {
 	AssertEqInt(sum,15);
     return 0;
 }
+int c_sum = 0;
+int continuous_inc=0;
 
+void inc(int & i, int j) {
+    continuous_inc++;
+    i +=j;
+}
+
+void scheduleMore(ContinousStream * continousStream) {
+
+    if (continuous_inc > 1000)
+        return ;
+
+    for (int i=0; i < 10; i++)  {
+
+        continousStream->post(boost::bind(&inc, boost::ref(c_sum), i));
+        if (i == 5) {
+            continousStream->checkForMoreWork();
+        }
+    }
+}
+TEST(ContinuousTest) {
+	ThreadProcessor testProcessor(200, 1);
+    ContinousStream continousStream(&testProcessor);
+    continousStream.run(scheduleMore);
+    continousStream.wait_until_done();
+	AssertEqInt(c_sum,1000);
+    return 0;
+}
 
 #ifdef __CYGWIN__
 int main (int argc, char * argv[]){
 	return windows_main(argc, argv);
 }
 #endif
+

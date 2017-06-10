@@ -9,7 +9,7 @@ class ContinousStream : boost::noncopyable
 {
 	public:
 
-		ContinousSteam(ThreadProcessor *threadProcessorp):
+		ContinousStream(ThreadProcessor *threadProcessorp):
 			number_of_jobs_total(0), number_of_jobs_complete(0),
 			cond_(), mutex(), threadProcessorp_(threadProcessorp) { }
         virtual ~ContinousStream() { };
@@ -20,13 +20,20 @@ class ContinousStream : boost::noncopyable
 		 * a boost::bind to schedule with arguments
 		 */
 		void post(boost::function<void ()> func) {
-			threadProcessorp_->post(boost::bind(&BatchTracker::wrap, this, func));
+			threadProcessorp_->post(boost::bind(&ContinousStream::wrap, this, func));
 			incJobCount();
 		}
 		void postWorkList(boost::function<void ()> func) {
-			threadProcessorp_->post(boost::bind(&BatchTracker::wrap, this, func));
+			threadProcessorp_->post(boost::bind(&ContinousStream::wrap, this, func));
 			incJobCount();
 		}
+        void run (boost::function<void (ContinousStream * continousStream)> func) {
+            getWorkFunc_=func;
+            checkForMoreWork();
+        }
+        void checkForMoreWork() {
+            post(boost::bind(getWorkFunc_,this));
+        }
 
 		/**
 		 * @param seconds max number of seconds to wait for all jobs to
@@ -98,5 +105,6 @@ class ContinousStream : boost::noncopyable
 		boost::condition cond_;
 		boost::mutex mutex;
 		ThreadProcessor *threadProcessorp_;
+        boost::function<void (ContinousStream * continousStream)> getWorkFunc_;
 };
 }
