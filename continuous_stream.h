@@ -27,13 +27,13 @@ class ContinousStream : boost::noncopyable
 			threadProcessorp_->post(boost::bind(&ContinousStream::wrap, this, func));
 			incJobCount();
 		}
-        void run (boost::function<void (ContinousStream * continousStream)> func) {
-            getWorkFunc_=func;
-            checkForMoreWork();
-        }
-        void checkForMoreWork() {
-            post(boost::bind(getWorkFunc_,this));
-        }
+		void run (boost::function<void (ContinousStream * continousStream)> func) {
+			getWorkFunc_=func;
+			checkForMoreWork();
+		}
+		void checkForMoreWork() {
+			post(boost::bind(getWorkFunc_,this));
+		}
 
 		/**
 		 * @param seconds max number of seconds to wait for all jobs to

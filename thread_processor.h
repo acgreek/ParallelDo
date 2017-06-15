@@ -15,9 +15,11 @@ class ThreadProcessor {
 			initialized_(false), actors_(),
 			number_messages_(0), done_(false), message_list_(),
 			max_wait_for_job_(max_wait_for_job),
-			number_of_worker_threads_(number_of_worker_threads), jobs_per_worker_(jobs_per_worker),exit_func_(NULL) {
+			number_of_worker_threads_(number_of_worker_threads), jobs_per_worker_(jobs_per_worker),exit_func_(NULL),
+ 			pending_or_processing_(0)	{
 				start_workers();
 			}
+
 		typedef boost::function<void ()> work_t;
 
 		void set_exit_func(ThreadProcessor::work_t exit_func) {
@@ -29,11 +31,9 @@ class ThreadProcessor {
 			done_ = true;
 		}
 
-		~ThreadProcessor() {
-			set_done();
-			cond_.notify_all();
-			//actors_.interrupt_all();
-			actors_.join_all();
+		virtual ~ThreadProcessor() {
+			printf("ThreadProcessor\n");
+			stop();
 		}
 
 		/**
@@ -46,14 +46,17 @@ class ThreadProcessor {
 			boost::mutex::scoped_lock lock(io_mutex_);
 			message_list_.push_back(func);
 			number_messages_++;
+			pending_or_processing_++;
 			lock.unlock();
 			cond_.notify_one();
+
 		}
 		void postWorkList(std::list<work_t> &worklist) {
 			boost::mutex::scoped_lock lock(io_mutex_);
 			int size = worklist.size();
 			message_list_.splice(message_list_.end(),worklist );
-			number_messages_+=size;
+			number_messages_ += size;
+			pending_or_processing_ += size;
 			lock.unlock();
 			cond_.notify_one();
 		}
@@ -61,10 +64,42 @@ class ThreadProcessor {
 		int queued() const {	//this is intensionally not locked
 			return number_messages_;
 		}
+
+		static int defaultNumberOfThreads() {
+			return boost::thread::hardware_concurrency();
+		}
+		int pending_or_processing() const {	
+			return pending_or_processing_;
+		}
+		int numberOfWorkerThreads () const {
+			return number_of_worker_threads_;
+		}
+
+
+	protected:
+		void stop() {
+			if (isDone())
+				return;
+			set_done();
+			cond_.notify_all();
+			actors_.join_all();
+
+		}
+		void setActionFunc(boost::function<void (int)> actionFunc) {
+			actionFunc_ = actionFunc;
+		}
+		boost::function<void (int)> actionFunc_ = NULL;
+		bool isDone() {
+			return done_;
+		}
+
 	private:
-		bool getJobs(std::list<work_t> &jobs) {
+		bool getJobs(const int worker_id, std::list<work_t> &jobs) {
 			boost::mutex::scoped_lock lock(io_mutex_);
 			while (false == done_ && queued() == 0) {
+				if (actionFunc_) {
+					actionFunc_(worker_id);
+				}
 				boost::system_time tAbsoluteTime = boost::get_system_time() + boost::posix_time::milliseconds(max_wait_for_job_);
 				cond_.timed_wait(io_mutex_, tAbsoluteTime);
 			}
@@ -81,7 +116,6 @@ class ThreadProcessor {
 			for (i=0; i < jobs_to_get; i++) {
 				++itr;
 			}
-
 			jobs.splice(jobs.end(), message_list_, message_list_.begin(), itr);
 			number_messages_-=i;
 			if (number_messages_> 0) {
@@ -90,30 +124,37 @@ class ThreadProcessor {
 			}
 			return true;
 		}
+		void mark_complete(const int jobs_complete) {
+			boost::mutex::scoped_lock lock(io_mutex_);
+			pending_or_processing_ -= jobs_complete;
+		}
 
-		void worker(int worker_id __attribute__((unused))) {
-
+		void worker(int worker_id) {
 			std::list<work_t> myWorkList;
 			while (!done_) {
 				work_t job;
-				bool success = getJobs(myWorkList);
+				bool success = getJobs(worker_id, myWorkList);
 				if (false == success)
 					break;
+				int jobs_complete = 0;
 				while (myWorkList.size() > 0) {
 					work_t job = myWorkList.front();
 					myWorkList.pop_front();
 					job();
+					jobs_complete++;
+					if (actionFunc_) {
+						actionFunc_(worker_id);
+					}
 				}
 				if (exit_func_)
 					exit_func_();
 			}
 		}
-
 		void start_workers() {
 			if (false == initialized_) {
-				int number_of_threads =
-					0 == number_of_worker_threads_ ? boost::thread::hardware_concurrency() : number_of_worker_threads_;
-				for (int i = 0; i < number_of_threads; i++) {
+				number_of_worker_threads_ =
+					0 == number_of_worker_threads_ ? defaultNumberOfThreads() : number_of_worker_threads_;
+				for (int i = 0; i < number_of_worker_threads_; i++) {
 					actors_.create_thread(boost::bind(&ThreadProcessor::worker, this, i));
 				}
 				initialized_ = true;
@@ -133,6 +174,7 @@ class ThreadProcessor {
 		int number_of_worker_threads_;
 		int jobs_per_worker_;
 		work_t exit_func_;
+		int pending_or_processing_;
 	public:
 };
 
