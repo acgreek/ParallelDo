@@ -8,7 +8,7 @@ namespace ParallelDo {
 class BatchTracker : boost::noncopyable
 {
 	public:
-		BatchTracker(ThreadProcessor *threadProcessorp):
+		BatchTracker(ThreadProcessor_interface *threadProcessorp):
 			number_of_jobs_total(0), number_of_jobs_complete(0),
 			cond_(), mutex(), threadProcessorp_(threadProcessorp) { }
 		virtual ~BatchTracker() { };
@@ -96,6 +96,6 @@ class BatchTracker : boost::noncopyable
 		volatile int number_of_jobs_complete;
 		boost::condition cond_;
 		boost::mutex mutex;
-		ThreadProcessor *threadProcessorp_;
+		ThreadProcessor_interface *threadProcessorp_;
 };
 }

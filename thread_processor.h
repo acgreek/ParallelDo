@@ -6,9 +6,10 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/utility.hpp>
+#include "thread_processor_interface.hpp"
 
 namespace ParallelDo {
-class ThreadProcessor {
+class ThreadProcessor : public ThreadProcessor_interface {
 	public:
 		ThreadProcessor(int max_wait_for_job = 500, int number_of_worker_threads = 0, int jobs_per_worker=5):
 			io_mutex_(), cond_(),
@@ -18,9 +19,8 @@ class ThreadProcessor {
 			number_of_worker_threads_(number_of_worker_threads), jobs_per_worker_(jobs_per_worker),exit_func_(NULL),
  			pending_or_processing_(0)	{
 				start_workers();
-			}
+		}
 
-		typedef boost::function<void ()> work_t;
 
 		void set_exit_func(ThreadProcessor::work_t exit_func) {
 			exit_func_ = exit_func;
@@ -42,7 +42,7 @@ class ThreadProcessor {
 		 *
 		 * func should be a function that takes no arguments
 		 */
-		void post(work_t func) {
+		virtual void post(work_t func) {
 			boost::mutex::scoped_lock lock(io_mutex_);
 			message_list_.push_back(func);
 			number_messages_++;
@@ -51,7 +51,7 @@ class ThreadProcessor {
 			cond_.notify_one();
 
 		}
-		void postWorkList(std::list<work_t> &worklist) {
+		virtual void postWorkList(std::list<work_t> &worklist) {
 			boost::mutex::scoped_lock lock(io_mutex_);
 			int size = worklist.size();
 			message_list_.splice(message_list_.end(),worklist );
@@ -61,17 +61,17 @@ class ThreadProcessor {
 			cond_.notify_one();
 		}
 
-		int queued() const {	//this is intensionally not locked
+		virtual int queued() const {	//this is intensionally not locked
 			return number_messages_;
 		}
 
 		static int defaultNumberOfThreads() {
 			return boost::thread::hardware_concurrency();
 		}
-		int pending_or_processing() const {	
+		virtual int pending_or_processing() const {	
 			return pending_or_processing_;
 		}
-		int numberOfWorkerThreads () const {
+		virtual int numberOfWorkerThreads () const {
 			return number_of_worker_threads_;
 		}
 
