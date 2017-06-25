@@ -18,7 +18,6 @@ class DeadLockDetectingThreadProcessor : public ThreadProcessor{
 				monitor_.create_thread(boost::bind(&DeadLockDetectingThreadProcessor::monitorActivity, this));
 		}
 		virtual ~DeadLockDetectingThreadProcessor() {
-			printf("Deadlocktection\n");
 			setActionFunc(NULL);
 			stop();
 			monitor_.interrupt_all();

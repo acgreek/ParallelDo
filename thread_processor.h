@@ -17,10 +17,9 @@ class ThreadProcessor : public ThreadProcessor_interface {
 			number_messages_(0), done_(false), message_list_(),
 			max_wait_for_job_(max_wait_for_job),
 			number_of_worker_threads_(number_of_worker_threads), jobs_per_worker_(jobs_per_worker),exit_func_(NULL),
- 			pending_or_processing_(0)	{
-				start_workers();
+			pending_or_processing_(0)	{
+			start_workers();
 		}
-
 
 		void set_exit_func(ThreadProcessor::work_t exit_func) {
 			exit_func_ = exit_func;
@@ -32,7 +31,6 @@ class ThreadProcessor : public ThreadProcessor_interface {
 		}
 
 		virtual ~ThreadProcessor() {
-			printf("ThreadProcessor\n");
 			stop();
 		}
 
@@ -83,7 +81,6 @@ class ThreadProcessor : public ThreadProcessor_interface {
 			set_done();
 			cond_.notify_all();
 			actors_.join_all();
-
 		}
 		void setActionFunc(boost::function<void (int)> actionFunc) {
 			actionFunc_ = actionFunc;
@@ -150,6 +147,7 @@ class ThreadProcessor : public ThreadProcessor_interface {
 					exit_func_();
 			}
 		}
+
 		void start_workers() {
 			if (false == initialized_) {
 				number_of_worker_threads_ =
@@ -160,15 +158,13 @@ class ThreadProcessor : public ThreadProcessor_interface {
 				initialized_ = true;
 			}
 		}
+
 		boost::mutex io_mutex_;
 		boost::condition cond_;
-
 		bool initialized_;
 		boost::thread_group actors_;
-
 		volatile int number_messages_;
 		volatile bool done_;
-
 		std::list<work_t> message_list_;
 		int max_wait_for_job_;
 		int number_of_worker_threads_;
@@ -178,5 +174,6 @@ class ThreadProcessor : public ThreadProcessor_interface {
 	public:
 };
 
-}
+} // namespace ParallelDo
+
 #endif

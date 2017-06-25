@@ -14,7 +14,6 @@ void func(int &i) {
 TEST(ThreadProcessor1) {
 	int i=0;
 	ThreadProcessor testProcessor(200, 1);
-
 	testProcessor.post(boost::bind(&func, boost::ref(i)));
 	while (testProcessor.queued())
 		sleep(1);
